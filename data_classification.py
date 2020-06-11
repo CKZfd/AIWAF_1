@@ -1,6 +1,11 @@
 """
-AI in WAF | 腾讯云网站管家 WAF AI 引擎实践
-https://blog.csdn.net/qcloud_security/article/details/81297376
+需要注意字段
+input_file = "data/payload2.csv"
+output_file = "out_file/payload2_withlabel.csv"
+data_list = data['payload'].values.tolist()
+id_list = data['id'].values.tolist()
+data_dict = {"id": id_list, "payload": data_list, "label": output_labels}
+df = pd.DataFrame(data_dict, columns=['id', 'payload', 'label'])
 """
 import torch
 import torch.nn
@@ -34,6 +39,7 @@ def str2index(data, seq_len):
 if __name__ == '__main__':
     SEQ_LEN = 100
     batch_size = 1000
+    # 需要测试的文件，以及测试结果输出文件
     input_file = "data/payload2.csv"
     output_file = "out_file/payload2_withlabel.csv"
 
@@ -46,20 +52,20 @@ if __name__ == '__main__':
     class_names = ['white', 'sqli', 'xss']
 
     start_time = time.time()
-    # 数据读入
+    # 数据读入，data_list里data['payload'] 之'payload' 和['id'] 需要根据表格头标签进行修改
     data = pd.read_csv(input_file)
     data_list = data['payload'].values.tolist()
     id_list = data['id'].values.tolist()
     output_labels = []
 
     charsIndexes = []
-    for i, chars in enumerate(data_list[:900]):
+    for i, chars in enumerate(data_list):
         charsIndex = str2index(chars, SEQ_LEN)
         charsIndexes.append(charsIndex)
         if (i+1) % batch_size == 0:
             inputs = np.array(charsIndexes)
             inputs = torch.from_numpy(inputs)
-            print(i, inputs, len(inputs))
+#             print(i, inputs, len(inputs))
             outputs = model(inputs)
             _, preds = torch.max(outputs, 1)
             output_labels += preds.numpy().tolist()
@@ -75,9 +81,10 @@ if __name__ == '__main__':
     print(output_labels.count(1))
     print(output_labels.count(2))
 
-    for i in range(900, len(data_list)):
-        output_labels.append(" ")
+#     for i in range(900, len(data_list)):
+#         output_labels.append(" ")
 
+    # 表格头行，每一列分别是
     data_dict = {"id": id_list, "payload": data_list, "label": output_labels}
     df = pd.DataFrame(data_dict, columns=['id', 'payload', 'label'])
     df.to_csv(output_file, index=False)
