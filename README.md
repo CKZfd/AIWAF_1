@@ -29,4 +29,7 @@ python data_classification.py
 # 请查阅该文件相关注释
 ```
 6、关于训练数据，使用dataloader加载，请参阅文件aiwaf_dataset.py
+模型请参阅 model.py, 训练生成的模型文件为model_aiwaf.pth
+其余为一些辅助调试和理解的程序
+
 
