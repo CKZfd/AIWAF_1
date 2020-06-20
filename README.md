@@ -5,7 +5,7 @@
 # 运行流程
 1. 下载源码  
 ```bash
-git https://github.com/CKZfd/AIWAF_1
+git clone https://github.com/CKZfd/AIWAF_1.git
 ```
 2. 安装必须的库
 ```bash
