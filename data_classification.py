@@ -1,11 +1,6 @@
 """
-需要注意字段
-input_file = "data/payload2.csv"
-output_file = "out_file/payload2_withlabel.csv"
-data_list = data['payload'].values.tolist()
-id_list = data['id'].values.tolist()
-data_dict = {"id": id_list, "payload": data_list, "label": output_labels}
-df = pd.DataFrame(data_dict, columns=['id', 'payload', 'label'])
+AI in WAF | 腾讯云网站管家 WAF AI 引擎实践
+https://blog.csdn.net/qcloud_security/article/details/81297376
 """
 import torch
 import torch.nn
@@ -39,9 +34,8 @@ def str2index(data, seq_len):
 if __name__ == '__main__':
     SEQ_LEN = 100
     batch_size = 1000
-    # 需要测试的文件，以及测试结果输出文件
-    input_file = "data/payload2.csv"
-    output_file = "out_file/payload2_withlabel.csv"
+    input_file = "data/sqli_base64.csv"
+    output_file = "out_file/sqli_base64.csv"
 
 
     # 模型加载
@@ -49,13 +43,13 @@ if __name__ == '__main__':
     model = torch.load('model_aiwaf.pth')
     model = model.to(device)
     model.eval()  # Set model to evaluate mode
-    class_names = ['white', 'sqli', 'xss']
+    class_names = ['white', 'attack']
 
     start_time = time.time()
-    # 数据读入，data_list里data['payload'] 之'payload' 和['id'] 需要根据表格头标签进行修改
+    # 数据读入, 根据表格的不同分别处理
     data = pd.read_csv(input_file)
-    data_list = data['payload'].values.tolist()
-    id_list = data['id'].values.tolist()
+    data_list = data['data'].values.tolist()
+    # id_list = data['id'].values.tolist()
     output_labels = []
 
     charsIndexes = []
@@ -65,7 +59,7 @@ if __name__ == '__main__':
         if (i+1) % batch_size == 0:
             inputs = np.array(charsIndexes)
             inputs = torch.from_numpy(inputs)
-#             print(i, inputs, len(inputs))
+            # print(i, inputs, len(inputs))
             outputs = model(inputs)
             _, preds = torch.max(outputs, 1)
             output_labels += preds.numpy().tolist()
@@ -79,14 +73,15 @@ if __name__ == '__main__':
 
     print(output_labels.count(0))
     print(output_labels.count(1))
-    print(output_labels.count(2))
 
-#     for i in range(900, len(data_list)):
-#         output_labels.append(" ")
+    # for i in range(900, len(data_list)):
+    #     output_labels.append(" ")
 
-    # 表格头行，每一列分别是
-    data_dict = {"id": id_list, "payload": data_list, "label": output_labels}
-    df = pd.DataFrame(data_dict, columns=['id', 'payload', 'label'])
+    # 需要根据表格形式自行增减
+    # data_dict = {"id": id_list, "payload": data_list, "label": output_labels}
+    # df = pd.DataFrame(data_dict, columns=['id', 'payload', 'label'])
+    data_dict = {"data": data_list, "label": output_labels}
+    df = pd.DataFrame(data_dict, columns=['data', 'label'])
     df.to_csv(output_file, index=False)
     print(time.time() - start_time)
 

@@ -80,17 +80,19 @@ class aiwaf_class(data.Dataset):
             np.random.seed(seed)
 
     def __getitem__(self, _):  # index随机生成
-        index_sub = np.random.randint(0, 3)  # 3分类， white, sqli, xss
+        index_sub = np.random.randint(0, 2)  # 2分类， white, （sqli, xss）
         label = index_sub
         if index_sub == 0:
             index = np.random.randint(0, self.white64_len)  # white 训练集长度
             data = self.white64_list[index]
         if index_sub == 1:
-            index = np.random.randint(0, self.sqli_len)  # sqli 训练集长度
-            data = self.sqli_list[index]
-        if index_sub == 2:
-            index = np.random.randint(0, self.xss_len)  # xss 训练集长度
-            data = self.xss_list[index]
+            index_sx = np.random.randint(0, 2)
+            if index_sx == 0:
+                index = np.random.randint(0, self.sqli_len)  # sqli 训练集长度
+                data = self.sqli_list[index]
+            if index_sx == 1:
+                index = np.random.randint(0, self.xss_len)  # xss 训练集长度
+                data = self.xss_list[index]
 
         # str2index  操作，
         data = self.str2index(data, self.seq_len)

@@ -31,3 +31,15 @@ class aiwafNet(nn.Module):
         out = F.relu(self.fc2(out))
         out = self.fc3(out)
         return out
+
+    # This function takes an input and predicts the class, (0 or 1)
+    def predict(self,x):
+        #Apply softmax to output
+        pred = F.softmax(self.forward(x))
+        ans = []
+        for t in pred:
+            if t[0]>t[1]:
+                ans.append(0)
+            else:
+                ans.append(1)
+        return torch.tensor(ans)

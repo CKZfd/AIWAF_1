@@ -99,25 +99,25 @@ def train_model(model, criterion, optimizer, scheduler, num_epochs=25):
         if i%14 != 0:
             train_acc[i] -= train_acc[i-1]
             train_loss[i] -= train_loss[i-1]
-    import json
-    file = open('train_acc.txt', 'w')
-    file.write(json.dumps(train_acc))
-    file.close()
-    file = open('train_loss.txt', 'w')
-    file.write(json.dumps(train_loss))
-    file.close()
-    file = open('val_acc.txt', 'w')
-    file.write(json.dumps(val_acc))
-    file.close()
+    # import json
+    # file = open('train_acc.txt', 'w')
+    # file.write(json.dumps(train_acc))
+    # file.close()
+    # file = open('train_loss.txt', 'w')
+    # file.write(json.dumps(train_loss))
+    # file.close()
+    # file = open('val_acc.txt', 'w')
+    # file.write(json.dumps(val_acc))
+    # file.close()
 
-    # torch.save(model, 'model_aiwaf.pth')
+    torch.save(model, 'model_aiwaf.pth')
     return model
 
 if __name__ == '__main__':
     batch_size = 512
     SEQ_LEN = 100
     EMBED_DIM = 12
-    NUN_CLASS = 3
+    NUN_CLASS = 2
     N_EPOCHS = 5
     hidden = [400, 20]
 
@@ -136,11 +136,12 @@ if __name__ == '__main__':
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     model_ft = aiwafNet(SEQ_LEN, EMBED_DIM, hidden, NUN_CLASS)
     model_ft = model_ft.to(device)
+    print(model_ft)
 
     criterion = torch.nn.CrossEntropyLoss()
     optimizer_ft = torch.optim.SGD(model_ft.parameters(), lr=0.001, momentum=0.9)
     # Decay LR by a factor of 0.1 every 7 epochs使用学习率缩减
-    exp_lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer_ft, step_size=7, gamma=0.1)
+    exp_lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer_ft, step_size=1000, gamma=0.1)
 
     model_ft = train_model(model_ft, criterion, optimizer_ft, exp_lr_scheduler,
                            num_epochs=N_EPOCHS)
